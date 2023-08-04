@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memo</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <div id="data-container"></div><br/>
+      <input class="input is-rounded" type="text" placeholder="Enter Something" id="message">
+      <button class="button is-success is-rounded" id="post-button">POST</button>
+      <!-- <button id="update-button">UPDATE</button> -->
+    </div>
+    
+    <script>
+      const postButton = document.getElementById("post-button");
+      const updateButton = document.getElementById('update-button');
+      const message = document.getElementById('message');
+      const dataContainer = document.getElementById('data-container');
+
+      axios.get('http://localhost:3000/memo')
+      .then(res => {
+        console.log(res.data);
+        let data = res.data;
+        data.forEach(val => {
+          const post = document.createElement('div');
+          const item = document.createElement('p');
+          const closeButton = document.createElement('button');
+          post.classList ='box';
+          closeButton.classList = 'button is-danger is-rounded';
+          item.textContent = val.post
+          post.appendChild(item);
+          post.appendChild(closeButton);
+          dataContainer.appendChild(post);
+          closeButton.innerHTML = 'ลบ';
+          closeButton.addEventListener('click', () => {
+            post.remove();
+            axios.delete(`http://localhost:3000/memo/${val.id}`)
+            .then(res => {
+              console.log(res.data);
+            })
+          })
+        })
+      })
+
+      const postMemo = (e) => {
+        e.preventDefault();
+
+        axios.post('http://localhost:3000/memo', {
+          post: message.value
+        })
+        .then(res => {
+          console.log(res.data);
+
+          const post = document.createElement('div');
+          const item = document.createElement('p');
+          const closeButton = document.createElement('button');
+          post.classList.add('box');
+          closeButton.classList = 'button is-danger is-rounded';
+          item.textContent = res.data.post
+          post.appendChild(item);
+          post.appendChild(closeButton);
+          dataContainer.appendChild(post);
+          closeButton.innerHTML = 'ลบ';
+          closeButton.addEventListener('click', () => {
+            post.remove();
+            axios.delete(`http://localhost:3000/memo/${res.data.id}`)
+            .then(res => {
+              console.log(res.data);
+            })
+          })
+        })
+
+        message.value ="";
+      };
+
+      const updateMemo = (e) => {
+        e.preventDefault();
+
+        axios.put('http://localhost:3000/memo/1', {
+          post: message.value
+        })
+        .then(res => {
+          console.log(res.data);
+        })
+      }
+
+      postButton.addEventListener("click", postMemo);
+      // updateButton.addEventListener('click', updateMemo);
+    </script>
+  </body>
+</html>
